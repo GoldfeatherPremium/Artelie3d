@@ -58,7 +58,7 @@ function dateInputValue(iso: string | null): string {
 export default async function AdminCouponsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ edit?: string }>;
+  searchParams: Promise<{ edit?: string; error?: string }>;
 }) {
   await requireRole(["admin"]);
   const sp = await searchParams;
@@ -89,6 +89,12 @@ export default async function AdminCouponsPage({
           </Link>
         ) : null}
       </div>
+
+      {sp.error ? (
+        <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-sm text-danger" role="alert">
+          {sp.error}
+        </p>
+      ) : null}
 
       <Card>
         <CardHeader>
