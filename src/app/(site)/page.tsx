@@ -14,12 +14,9 @@ import {
   listCollections,
   listBrands,
 } from "@/lib/data/catalog";
+import { categoryBanner, collectionBanner, interiorImage, localHeroFor } from "@/lib/data/assets";
 
-const EDITORIAL_IMAGES = [
-  "https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=80",
-];
+const EDITORIAL_INTERIORS = ["living-luxury", "bedroom-japandi", "dining-contemporary"];
 
 const STEPS = [
   {
@@ -77,6 +74,8 @@ export default async function HomePage() {
   const heroProduct = featured.find((p) => p.type === "configurable" && p.model_config) ?? featured[0] ?? null;
   const customizeDemo = [...featured, ...bestsellers].find((p) => p.type === "configurable" && p.model_config) ?? null;
 
+  const editorialImages = EDITORIAL_INTERIORS.map((id) => interiorImage(id)).filter((src): src is string => Boolean(src));
+
   return (
     <div>
       {/* ------------------------------------------------------------------ */}
@@ -95,10 +94,10 @@ export default async function HomePage() {
               <Reveal key={collection.id} delay={index * 0.08}>
                 <Link href={`/collections/${collection.slug}`} className="group block overflow-hidden rounded-2xl bg-paper shadow-card transition-shadow hover:shadow-raised">
                   <div className="aspect-[4/3] overflow-hidden bg-stone/40">
-                    {collection.hero_image_url ? (
+                    {(collectionBanner(collection.slug) ?? collection.hero_image_url) ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={collection.hero_image_url}
+                        src={collectionBanner(collection.slug) ?? collection.hero_image_url!}
                         alt={collection.name}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
@@ -134,10 +133,10 @@ export default async function HomePage() {
               <Reveal key={category.id} delay={index * 0.06}>
                 <Link href={`/shop/${category.slug}`} className="group relative block overflow-hidden rounded-2xl">
                   <div className="aspect-[3/4] overflow-hidden bg-stone/50">
-                    {category.image_url ? (
+                    {(categoryBanner(category.slug) ?? category.image_url) ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={category.image_url}
+                        src={categoryBanner(category.slug) ?? category.image_url!}
                         alt={category.name}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
@@ -199,12 +198,10 @@ export default async function HomePage() {
             {customizeDemo ? (
               <div className="overflow-hidden rounded-3xl border border-line bg-paper shadow-raised">
                 <div className="relative h-[26rem]">
-                  {/* ModelScene is rendered client-side via the viewer on the product page;
-                      here we show the product photography editorial block. */}
-                  {customizeDemo.images[0] ? (
+                  {(localHeroFor(customizeDemo.slug) ?? customizeDemo.images[0]?.url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={customizeDemo.images[0].url}
+                      src={localHeroFor(customizeDemo.slug) ?? customizeDemo.images[0]!.url}
                       alt={customizeDemo.name}
                       loading="lazy"
                       className="h-full w-full object-cover"
@@ -263,7 +260,7 @@ export default async function HomePage() {
         <div className="container-site">
           <SectionHeading overline="Inspiration" title="Design inspiration" align="center" />
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
-            {EDITORIAL_IMAGES.map((src, index) => (
+            {editorialImages.map((src, index) => (
               <Reveal key={src} delay={index * 0.08}>
                 <div className="group overflow-hidden rounded-2xl bg-stone/40">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
