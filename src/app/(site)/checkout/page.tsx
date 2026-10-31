@@ -108,7 +108,9 @@ export default function CheckoutPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [couponStatus, setCouponStatus] = React.useState<string | null>(null);
 
-  const set = (patch: Partial<FormState>) => setForm((f) => ({ ...f, ...patch }));
+  const set = (
+    patch: Partial<FormState> | ((prev: FormState) => Partial<FormState>),
+  ) => setForm((f) => ({ ...f, ...(typeof patch === "function" ? patch(f) : patch) }));
 
   React.useEffect(() => {
     getCheckoutContext()
@@ -137,12 +139,14 @@ export default function CheckoutPage() {
   async function applyCoupon() {
     if (!form.coupon.trim()) return;
     const result = await validateCoupon(form.coupon);
-    if (result.ok && result.coupon) {
-      setCouponStatus(`Coupon ${result.coupon.code} accepted — it will be verified and applied at order time.`);
-      toast.toast({ title: "Coupon accepted", description: "Verified again at order time.", variant: "success" });
-    } else {
+    if (!result.ok) {
       setCouponStatus(null);
       toast.toast({ title: "Coupon not accepted", description: result.error, variant: "error" });
+      return;
+    }
+    if (result.coupon) {
+      setCouponStatus(`Coupon ${result.coupon.code} accepted — it will be verified and applied at order time.`);
+      toast.toast({ title: "Coupon accepted", description: "Verified again at order time.", variant: "success" });
     }
   }
 
