@@ -1,15 +1,25 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/supabase/server";
+import { requireUser, getUser } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { getUserRole } from "@/lib/auth/roles";
 
 async function getDefaultWishlist(db: ReturnType<typeof createServiceClient>, userId: string) {
-  const { data, error } = await db.from("wishlists").select("id").eq("user_id", userId).order("created_at", { ascending: true }).limit(1).maybeSingle();
+  const { data, error } = await db
+    .from("wishlists")
+    .select("id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (data) return data.id;
-  const { data: created, error: insertError } = await db.from("wishlists").insert({ user_id: userId }).select("id").maybeSingle();
+  const { data: created, error: insertError } = await db
+    .from("wishlists")
+    .insert({ user_id: userId })
+    .select("id")
+    .maybeSingle();
   if (insertError || !created) throw new Error(insertError?.message ?? "Failed to create wishlist");
   return created.id;
 }
@@ -38,7 +48,12 @@ export async function toggleWishlist(productId: string): Promise<{ inWishlist: b
 }
 
 export async function getWishlistProductIds(): Promise<string[]> {
-  const user = await getUser()?.catch(() => null);
+  let user: Awaited<ReturnType<typeof getUser>> = null;
+  try {
+    user = await getUser();
+  } catch {
+    return [];
+  }
   if (!user) return [];
   const db = createServiceClient();
   const { data, error } = await db
@@ -89,7 +104,8 @@ export async function listWishlist() {
             basePriceCents: item.products.base_price_cents,
             salePriceCents: item.products.sale_price_cents,
             status: item.products.status,
-            imageUrl: [...(item.products.product_images ?? [])].sort((a, b) => a.position - b.position)[0]?.url ?? null,
+            imageUrl:
+              [...(item.products.product_images ?? [])].sort((a, b) => a.position - b.position)[0]?.url ?? null,
           }
         : null,
     };
