@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>html,body{margin:0;padding:0;background:#f6f3ed;overflow:hidden}#c{width:400px;height:400px;display:block}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from '../../node_modules/three/build/three.module.js';
+
+const out = { webgl2: !!document.createElement('canvas').getContext('webgl2'), webgl: !!document.createElement('canvas').getContext('webgl') };
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(400, 400);
+renderer.setPixelRatio(1);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf6f3ed);
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+camera.position.set(2, 1.6, 3); camera.lookAt(0, 0.4, 0);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(4, 6, 3); scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(-4, 3, -2); scene.add(fill);
+
+const geo = new THREE.SphereGeometry(0.9, 48, 32);
+const mat = new THREE.MeshStandardMaterial({ color: 0xd9b28c, roughness: 0.35, metalness: 0.1 });
+const mesh = new THREE.Mesh(geo, mat); mesh.position.y = 0.9;
+scene.add(mesh);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshStandardMaterial({ color: 0xe4ded2, roughness: 0.9 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+renderer.render(scene, camera);
+out.pixelsOk = (() => { const gl = renderer.getContext(); const px = new Uint8Array(4); gl.readPixels(200, 200, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); return px[0] + px[1] + px[2] > 60; })();
+out.rendered = true;
+window.__TEST_RESULT__ = out;
+</script>
+</body>
+</html>
