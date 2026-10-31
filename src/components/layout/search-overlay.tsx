@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Search, X } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
+import { localHeroFor } from "@/lib/data/assets";
 
 interface Suggestion {
   id: string;
@@ -121,12 +122,15 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                           }}
                           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-ivory"
                         >
-                          {item.images[0] ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={item.images[0].url} alt="" className="h-10 w-10 rounded-md object-cover" />
-                          ) : (
-                            <span className="h-10 w-10 rounded-md bg-stone/50" />
-                          )}
+                          {(() => {
+                            const src = localHeroFor(item.slug) ?? item.images[0]?.url;
+                            return src ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={src} alt="" className="h-10 w-10 rounded-md object-cover" />
+                            ) : (
+                              <span className="h-10 w-10 rounded-md bg-stone/50" />
+                            );
+                          })()}
                           <span className="min-w-0">
                             <span className="block truncate text-body-sm font-medium text-ink">{item.name}</span>
                             <span className="block text-caption text-fog">
