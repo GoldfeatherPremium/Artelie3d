@@ -16,6 +16,7 @@ import { Rating } from "@/components/ui/rating";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/motion/section-heading";
 import { Reveal } from "@/components/motion/reveal";
+import { localHeroFor } from "@/lib/data/assets";
 import type { CustomizationSchema } from "@/lib/pricing";
 
 interface ProductPageProps {
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   if (!product) return {};
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-  const image = product.images[0]?.url;
+  const image = localHeroFor(product.slug) ?? product.images[0]?.url;
 
   return {
     title: product.name,
@@ -84,6 +85,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <Gallery
               images={product.images.map((img) => ({ url: img.url, altText: img.alt_text }))}
               name={product.name}
+              slug={product.slug}
             />
           </Reveal>
 
