@@ -48,7 +48,10 @@ export function ProfileSettingsForm({ initialFullName, initialPhone, initialEmai
         toast.toast({ title: "Settings saved", variant: "success" });
         router.refresh();
       } else {
-        toast.toast({ title: "Could not save", description: !profileResult.ok ? profileResult.error : prefsResult.error, variant: "error" });
+        let errMsg: string | null = null;
+        if (!profileResult.ok) errMsg = profileResult.error;
+        else if (!prefsResult.ok) errMsg = prefsResult.error;
+        toast.toast({ title: "Could not save", description: errMsg, variant: "error" });
       }
     } finally {
       setPending(false);
