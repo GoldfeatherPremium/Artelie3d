@@ -86,11 +86,12 @@ export function ShowroomClient({ products }: { products: ShowroomProduct[] }) {
             <RotateCcw className="h-4 w-4" /> Reset camera
           </Button>
           {selected ? (
-            <Button asChild={false} disabled={false}>
-              <Link href={`/products/${selected.slug}`} className="inline-flex items-center gap-2">
-                Customize & price <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <Link
+              href={`/products/${selected.slug}`}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-charcoal px-7 text-body-md font-medium tracking-wide text-ivory transition-colors hover:bg-ink"
+            >
+              Customize & price <ArrowRight className="h-4 w-4" />
+            </Link>
           ) : null}
         </div>
       </aside>
