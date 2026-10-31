@@ -91,21 +91,22 @@ export async function listWishlist() {
         sale_price_cents: number | null;
         status: string;
         product_images: { url: string; position: number }[];
-      } | null;
+      }[] | null;
     };
+    const product = item.products?.[0] ?? null;
     return {
       id: item.id,
       createdAt: item.created_at,
-      product: item.products
+      product: product
         ? {
-            id: item.products.id,
-            name: item.products.name,
-            slug: item.products.slug,
-            basePriceCents: item.products.base_price_cents,
-            salePriceCents: item.products.sale_price_cents,
-            status: item.products.status,
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            basePriceCents: product.base_price_cents,
+            salePriceCents: product.sale_price_cents,
+            status: product.status,
             imageUrl:
-              [...(item.products.product_images ?? [])].sort((a, b) => a.position - b.position)[0]?.url ?? null,
+              [...(product.product_images ?? [])].sort((a, b) => a.position - b.position)[0]?.url ?? null,
           }
         : null,
     };
