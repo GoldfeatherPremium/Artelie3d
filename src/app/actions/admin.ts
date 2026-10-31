@@ -116,6 +116,21 @@ function dateToIso(value: unknown): string | null {
 }
 
 /**
+ * Parse a Zod form schema; on failure redirect via the action's fail helper.
+ * Returns the parsed data. The explicit cast is safe because the failure path
+ * never returns (the fail helper redirects/throws).
+ */
+function parseOrFail<O>(
+  result: z.SafeParseReturnType<unknown, O>,
+  fail: (message: string) => never,
+): O {
+  if (!result.success) {
+    fail(result.error.issues.map((i) => i.message).join("; "));
+  }
+  return result.data as O;
+}
+
+/**
  * Update a user's role (promote/demote). Protects the last admin and prevents
  * admins from changing their own role.
  */
@@ -655,11 +670,7 @@ export async function saveCoupon(formData: FormData): Promise<void> {
       ends_at: formText(formData, "ends_at"),
       active: formText(formData, "active") ?? "off",
     };
-    const parsed = couponFormSchema.safeParse(raw);
-    if (!parsed.success) {
-      fail(parsed.error.issues.map((i) => i.message).join("; "));
-    }
-    const data = parsed.data;
+    const data = parseOrFail(couponFormSchema.safeParse(raw), fail);
     const db = createServiceClient();
 
     if (data.id) {
@@ -861,11 +872,7 @@ export async function saveCategory(formData: FormData): Promise<void> {
       image_url: formText(formData, "image_url"),
       sort_order: formText(formData, "sort_order"),
     };
-    const parsed = categoryFormSchema.safeParse(raw);
-    if (!parsed.success) {
-      fail(parsed.error.issues.map((i) => i.message).join("; "));
-    }
-    const data = parsed.data;
+    const data = parseOrFail(categoryFormSchema.safeParse(raw), fail);
     const slug = data.slug || slugify(data.name);
     const db = createServiceClient();
 
@@ -904,7 +911,7 @@ export async function savePlatformSettings(input: unknown | FormData): Promise<v
     const actor = await getActor();
     let parsed: unknown;
     if (input instanceof FormData) {
-      const raw = formText(input, "json");
+      const raw = formText(input, "json") ?? "";
       if (!raw) fail("Settings JSON is required");
       parsed = JSON.parse(raw);
     } else {
