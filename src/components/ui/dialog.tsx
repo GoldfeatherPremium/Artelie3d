@@ -23,7 +23,7 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
   return <DialogContext.Provider value={value}>{children}</DialogContext.Provider>;
 }
 
-export interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DialogContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onDrag"> {
   hideClose?: boolean;
 }
 
