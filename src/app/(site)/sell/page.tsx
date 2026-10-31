@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUserRole } from "@/lib/auth/roles";
-import { getUser } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/admin";
+import { getUser, createSupabaseServer } from "@/lib/supabase/server";
 import { requestSellerOnboarding } from "@/app/actions/seller";
 import { SectionHeading } from "@/components/motion/section-heading";
 import { Reveal } from "@/components/motion/reveal";
@@ -24,7 +23,7 @@ export default async function SellPage() {
 
   let existingStatus: string | null = null;
   if (user) {
-    const db = createServiceClient();
+    const db = await createSupabaseServer();
     const { data } = await db
       .from("seller_profiles")
       .select("status")
