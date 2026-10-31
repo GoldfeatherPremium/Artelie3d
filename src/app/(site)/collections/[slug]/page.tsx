@@ -3,6 +3,7 @@ import { getCollectionBySlug, listProducts } from "@/lib/data/catalog";
 import { ProductCard } from "@/components/catalog/product-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeading } from "@/components/motion/section-heading";
+import { collectionBanner } from "@/lib/data/assets";
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -24,13 +25,14 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   if (!collection) notFound();
 
   const result = await listProducts({ collectionSlug: collection.slug, pageSize: 24 });
+  const hero = collectionBanner(collection.slug) ?? collection.hero_image_url;
 
   return (
     <div className="bg-ivory">
-      {collection.hero_image_url ? (
+      {hero ? (
         <div className="relative h-72 w-full overflow-hidden sm:h-96">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={collection.hero_image_url} alt={collection.name} className="h-full w-full object-cover" />
+          <img src={hero} alt={collection.name} className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 container-site pb-8">
             <p className="text-caption font-medium uppercase tracking-[0.2em] text-ivory/80">Collection</p>
