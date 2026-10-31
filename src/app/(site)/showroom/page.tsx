@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/lib/supabase/admin";
+import { createPublicClient } from "@/lib/supabase/server";
 import { SectionHeading } from "@/components/motion/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { ShowroomClient, type ShowroomProduct } from "@/components/showroom/showroom-client";
@@ -11,7 +11,7 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function ShowroomPage() {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data: rows } = await db
     .from("products")
     .select(
