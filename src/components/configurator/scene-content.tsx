@@ -1,11 +1,11 @@
+import { MODEL_KINDS, type ModelKind } from "@/lib/models3d/kinds";
 import type { MaterialOverride } from "@/lib/pricing";
-import { SofaModel } from "./models/sofa";
-import { ArmchairModel } from "./models/armchair";
-import { DiningTableModel } from "./models/table";
+import { ModelMesh } from "./models/model-mesh";
 
-export type ModelKind = "sofa" | "armchair" | "table";
+export type { ModelKind } from "@/lib/models3d/kinds";
 
-export const SUPPORTED_MODEL_KINDS: ModelKind[] = ["sofa", "armchair", "table"];
+/** Every procedural model kind is supported by the live viewer. */
+export const SUPPORTED_MODEL_KINDS: ModelKind[] = MODEL_KINDS;
 
 export interface SceneContentProps {
   kind: ModelKind;
@@ -13,12 +13,5 @@ export interface SceneContentProps {
 }
 
 export function SceneContent({ kind, materials }: SceneContentProps) {
-  switch (kind) {
-    case "sofa":
-      return <SofaModel materials={materials} />;
-    case "armchair":
-      return <ArmchairModel materials={materials} />;
-    case "table":
-      return <DiningTableModel materials={materials} />;
-  }
+  return <ModelMesh kind={kind} materials={materials} />;
 }
