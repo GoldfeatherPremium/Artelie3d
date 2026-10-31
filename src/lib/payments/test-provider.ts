@@ -55,13 +55,14 @@ async function recordPaymentEvent(evt: { type: string; data: unknown }): Promise
   const service = createServiceClient();
   const { error } = await service
     .from("payment_events")
-    .insert({
-      event_type: evt.type,
-      payload: evt.data,
-      provider_event_id: providerEventIdFor(evt),
-    })
-    .onConflict("provider_event_id")
-    .doNothing();
+    .insert(
+      {
+        event_type: evt.type,
+        payload: evt.data,
+        provider_event_id: providerEventIdFor(evt),
+      },
+      { onConflict: "provider_event_id", ignoreDuplicates: true },
+    );
   if (error) {
     throw new PaymentError("EVENT_RECORD_FAILED", `Failed to record payment event: ${error.message}`);
   }
