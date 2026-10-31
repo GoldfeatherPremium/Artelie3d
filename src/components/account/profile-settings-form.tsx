@@ -51,7 +51,7 @@ export function ProfileSettingsForm({ initialFullName, initialPhone, initialEmai
         let errMsg: string | null = null;
         if (!profileResult.ok) errMsg = profileResult.error;
         else if (!prefsResult.ok) errMsg = prefsResult.error;
-        toast.toast({ title: "Could not save", description: errMsg, variant: "error" });
+        toast.toast({ title: "Could not save", description: errMsg ?? undefined, variant: "error" });
       }
     } finally {
       setPending(false);
