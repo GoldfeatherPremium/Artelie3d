@@ -328,7 +328,7 @@ export async function createOrderFromCheckout(
       )
       .eq("cart_id", input.cartId);
     if (linesError) throw new CommerceError("CART_READ_FAILED", linesError.message);
-    const joined = (lines ?? []) as CartLineJoined[];
+    const joined = ((lines ?? []) as unknown) as CartLineJoined[];
     if (joined.length === 0) throw new CommerceError("EMPTY_CART", "Cart is empty");
 
     // First product image per product (snapshot for order_items).
