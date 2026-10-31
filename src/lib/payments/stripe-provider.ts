@@ -112,7 +112,11 @@ export class StripeProvider implements PaymentProvider {
       throw new PaymentConfigError("PAYMENT_PROVIDER_SECRET_KEY is not set.");
     }
     const require = createRequire(__filename);
-    const Stripe = require("stripe") as StripeCtor;
+    // Non-literal request: keeps the package out of the webpack dependency
+    // graph so the production build succeeds without `stripe` installed. The
+    // package is resolved at runtime only when this provider is selected.
+    const pkgName = "stripe";
+    const Stripe = require(pkgName) as StripeCtor;
     return Stripe(secretKey);
   }
 
