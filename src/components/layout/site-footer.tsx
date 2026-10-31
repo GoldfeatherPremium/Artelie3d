@@ -48,8 +48,10 @@ export async function SiteFooter() {
             <ul className="grid gap-2">
               <li><Link href="/showroom" className="text-body-sm text-ink/70 transition-colors hover:text-ink">3D Showroom</Link></li>
               <li><Link href="/room-designer" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Room Designer</Link></li>
+              <li><Link href="/room-inspiration" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Room inspiration</Link></li>
               <li><Link href="/designers" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Designers</Link></li>
               <li><Link href="/brands" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Brands</Link></li>
+              <li><Link href="/sell" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Sell with us</Link></li>
             </ul>
           </div>
           <div className="lg:col-span-2">
@@ -57,7 +59,7 @@ export async function SiteFooter() {
             <ul className="grid gap-2">
               <li><Link href="/about" className="text-body-sm text-ink/70 transition-colors hover:text-ink">About us</Link></li>
               <li><Link href="/contact" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Contact</Link></li>
-              <li><Link href="/faq" className="text-body-sm text-ink/70 transition-colors hover:text-ink">FAQ</Link></li>
+              <li><Link href="/faqs" className="text-body-sm text-ink/70 transition-colors hover:text-ink">FAQ</Link></li>
               <li><Link href="/shipping-policy" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Shipping</Link></li>
               <li><Link href="/returns-policy" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Returns</Link></li>
               <li><Link href="/privacy" className="text-body-sm text-ink/70 transition-colors hover:text-ink">Privacy</Link></li>
