@@ -8,14 +8,13 @@ import type { MaterialOverride } from "@/lib/pricing";
 /** Convert a customization map (keyed by group) into one keyed by mesh part name. */
 export function materialOverridesByPart(
   overrides: Record<string, MaterialOverride>,
-): Record<string, { color?: string; roughness?: number; metalness?: number }> {
-  const byPart: Record<string, { color?: string; roughness?: number; metalness?: number }> = {};
+): Record<string, { color?: string; roughness?: number }> {
+  const byPart: Record<string, { color?: string; roughness?: number }> = {};
   for (const value of Object.values(overrides)) {
     if (!value?.name) continue;
     byPart[value.name] = {
       color: value.color,
       roughness: value.roughness,
-      metalness: value.metalness,
     };
   }
   return byPart;
