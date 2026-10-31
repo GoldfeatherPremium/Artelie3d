@@ -7,10 +7,13 @@
  * the result with sharp to WebP at outWidth.
  */
 import puppeteer from "puppeteer";
-import sharp from "sharp";
+import { createRequire } from "node:module";
 import { readFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+const require = createRequire(import.meta.url);
+const sharp = require("sharp");
 
 const here = dirname(fileURLToPath(import.meta.url));
 const jobsFile = process.argv[2];
