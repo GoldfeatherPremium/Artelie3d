@@ -1,7 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CartError, normalizeConfiguration, summarizeConfiguration } from "./cart";
-import { addToCart } from "./cart";
-import { createServiceClient } from "@/lib/supabase/admin";
+import { CartError, normalizeConfiguration, summarizeConfiguration, addToCart } from "./cart";
 
 describe("summarizeConfiguration", () => {
   it("returns null for missing or empty configuration", () => {
@@ -30,15 +28,13 @@ describe("normalizeConfiguration", () => {
     expect(normalizeConfiguration({ fabric: "linen", qty: 2 })).toEqual({ fabric: "linen", qty: "2" });
   });
 
-  it("returns null for an empty object", () => {
-    // Empty object normalizes to {} (not null) — cart merge uses it as a valid empty configuration.
+  it("returns an empty object for an empty object", () => {
     expect(normalizeConfiguration({})).toEqual({});
   });
 });
 
 describe("addToCart validation", () => {
   it("rejects non-positive quantities before hitting the database", async () => {
-    const db = createServiceClient();
     await expect(
       addToCart({
         cartId: "cart",
@@ -47,7 +43,6 @@ describe("addToCart validation", () => {
         unitPriceCents: 100,
       }),
     ).rejects.toThrow(CartError);
-    void db;
   });
 
   it("rejects fractional quantities", async () => {
