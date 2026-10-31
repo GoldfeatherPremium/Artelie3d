@@ -23,7 +23,7 @@ function Drawer({ open, onOpenChange, children }: DrawerProps) {
   return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;
 }
 
-export interface DrawerContentProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DrawerContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onDrag"> {
   side?: "left" | "right";
   hideClose?: boolean;
 }
