@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { format } from "date-fns";
+import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/roles";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { formatCurrency } from "@/lib/utils";
@@ -40,7 +41,12 @@ function refundStatusVariant(status: string): "success" | "danger" | "warning" |
   return "warning";
 }
 
-export default async function AdminRefundsPage() {
+export default async function AdminRefundsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const sp = await searchParams;
   await requireRole(["admin"]);
   const db = createServiceClient();
 
@@ -60,6 +66,12 @@ export default async function AdminRefundsPage() {
         <h1 className="font-display text-display-md text-ink">Refunds</h1>
         <p className="text-body-sm text-fog">Review and process refund requests.</p>
       </div>
+
+      {sp.error ? (
+        <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-sm text-danger" role="alert">
+          {sp.error}
+        </p>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -125,21 +137,7 @@ export default async function AdminRefundsPage() {
                           >
                             Approve
                           </ConfirmButton>
-                          <form
-                            action={reviewRefund.bind(null, refund.id, "rejected")}
-                            className="flex items-center gap-2"
-                          >
-                            <Input
-                              name="reason"
-                              placeholder="Reason (sent to customer)"
-                              required
-                              aria-label="Rejection reason"
-                              className="h-9 w-44"
-                            />
-                            <Button type="submit" variant="danger" size="sm">
-                              Reject
-                            </Button>
-                          </form>
+                          <RejectRefundForm refundId={refund.id} />
                         </div>
                       ) : (
                         <span className="text-caption text-fog">No action</span>
@@ -153,5 +151,30 @@ export default async function AdminRefundsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function RejectRefundForm({ refundId }: { refundId: string }) {
+  async function reject(formData: FormData): Promise<void> {
+    "use server";
+    const result = await reviewRefund(refundId, "rejected", formData);
+    if (!result.ok) {
+      redirect(`/admin/refunds?error=${encodeURIComponent(result.error)}`);
+    }
+  }
+
+  return (
+    <form action={reject} className="flex items-center gap-2">
+      <Input
+        name="reason"
+        placeholder="Reason (sent to customer)"
+        required
+        aria-label="Rejection reason"
+        className="h-9 w-44"
+      />
+      <Button type="submit" variant="danger" size="sm">
+        Reject
+      </Button>
+    </form>
   );
 }
