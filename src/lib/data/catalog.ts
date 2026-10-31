@@ -36,6 +36,15 @@ export interface CatalogProduct {
   created_at: string;
 }
 
+export interface SearchSuggestion {
+  id: string;
+  name: string;
+  slug: string;
+  base_price_cents: number;
+  sale_price_cents: number | null;
+  images: { url: string; position: number }[];
+}
+
 export interface CategoryRow {
   id: string;
   name: string;
@@ -404,7 +413,7 @@ export async function listStores(): Promise<StoreRow[]> {
   return (data ?? []) as unknown as StoreRow[];
 }
 
-export async function searchSuggestions(q: string, limit = 6): Promise<Pick<CatalogProduct, "id" | "name" | "slug" | "base_price_cents" | "sale_price_cents" | "images">[]> {
+export async function searchSuggestions(q: string, limit = 6): Promise<SearchSuggestion[]> {
   const term = q.trim();
   if (!term) return [];
   const db = createServiceClient();
