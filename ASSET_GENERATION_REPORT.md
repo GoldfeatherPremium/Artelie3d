@@ -44,16 +44,22 @@ designer and hero render.
 
 | Surface | Method |
 |---|---|
-| Product photography / banners / interiors | Two pipelines, same outputs paths: (a) **offline photorealistic renderer** `scripts/render` (headless Chromium, SwiftShader, bundles the actual Three.js builders with studio lighting, shadows, RoomEnvironment) producing high-quality raster; supported (b) **deterministic vector renderer** `scripts/generate-assets.mjs` (SVG compositions → WebP via sharp) that runs at build time so deployments always ship assets. |
+| Product photography / banners / interiors | Two pipelines, same output paths: (a) **offline photorealistic renderer** `scripts/render` (headless Chromium, SwiftShader, bundles the actual Three.js builders with studio lighting, shadows, RoomEnvironment) producing high-quality raster; and (b) **deterministic vector renderer** `scripts/generate-assets.mjs` (SVG compositions → WebP via sharp) that runs at build time (`prebuild`) and is committed under `public/assets`. The committed set is the vector renderer output — deterministic and re-generatable (`npm run generate:assets`). |
 | 3D models | Procedural Three.js geometry (original, no stock assets, no image planes). |
+
+The committed raster set and the build-time regeneration use the same
+generator, so the branch and every deployment stay in sync (deployments
+regenerate assets during `prebuild` even from a fresh clone).
 
 ## 3. Verification
 
 - `npm run typecheck` → exit 0.
 - `npm run test` → 40 passed, 4 skipped (integration needs live DB).
-- Asset files: 175 WebP generated; dimensions verified (products 1200×1500,
-  categories 1200×900, collections 1920×1080, interiors 1600×1067); manifest at
-  `public/assets/manifest.json`.
+- Asset files: 176 WebP committed under `public/assets`; manifest at
+  `public/assets/manifest.json` (products 30 × 5 views, categories 8,
+  collections 5, interiors 12, total 175). Dimensions are the same as the
+  generator spec (products 1200×1500, categories 1200×900, collections
+  1920×1080, interiors 1600×1067).
 - Every product's photography matches its 3D model kind (single identity).
 
 ## 4. Integration
@@ -63,8 +69,8 @@ designer and hero render.
   suggestions, showroom list, homepage collections/categories/interiors,
   collection & category banners all prefer local assets with a database
   fallback.
-- Configurator viewer upgraded from 3 to **all 30 model kinds**; material
-  options now actually re-style the mesh parts (group→part re-keying).
+- Configurator viewer supports all 30 model kinds; material options actually
+  re-style the mesh parts (group→part re-keying).
 - Showroom renders real geometry; room designer is a functional 3D planner
   (templates, place/move/rotate/scale, save/load locally).
 
@@ -76,10 +82,12 @@ designer and hero render.
   `3D_MODEL_GUIDE.md`.
 - **Texture maps** are not baked (normal/metal/AO); PBR properties are
   procedural and lightweight for mobile.
-- **Photorealistic raster** was generated locally with the headless renderer;
-  because this toolchain commits text-only files, deployed assets are produced
-  at build time by the deterministic vector renderer (consistent brand
-  language). Re-run `scripts/render` on a workstation to replace them with the
+- **Photorealistic raster** (headless Chromium pipeline) was run locally to
+  produce the batch definitions under `scripts/render/jobs/` (committed) but
+  its browser bundle `scripts/render/runtime.mjs` and the photorealistic raster
+  output are not committed — they are regenerated on a workstation with a
+  bundler/Chromium. Deployed assets are the deterministic vector set (same
+  paths). Re-run `scripts/render` on a workstation to replace them with the
   photorealistic set under identical paths.
 - **Catalog gap**: the seeded database has 14 products; the other 16 brief
   products have complete assets and model kinds ready but no DB row yet (they
