@@ -23,12 +23,14 @@ function Drawer({ open, onOpenChange, children }: DrawerProps) {
   return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;
 }
 
-export interface DrawerContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onDrag"> {
+export interface DrawerContentProps {
+  className?: string;
   side?: "left" | "right";
   hideClose?: boolean;
+  children?: React.ReactNode;
 }
 
-function DrawerContent({ className, side = "right", hideClose, children, ...props }: DrawerContentProps) {
+function DrawerContent({ className, side = "right", hideClose, children }: DrawerContentProps) {
   const { open, onOpenChange } = React.useContext(DrawerContext);
 
   React.useEffect(() => {
@@ -71,7 +73,6 @@ function DrawerContent({ className, side = "right", hideClose, children, ...prop
               isRight ? "right-0" : "left-0",
               className,
             )}
-            {...props}
           >
             {!hideClose && (
               <button
