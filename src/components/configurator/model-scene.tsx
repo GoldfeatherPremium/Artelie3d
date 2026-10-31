@@ -5,7 +5,9 @@ import { cn } from "@/lib/utils";
 import type { MaterialOverride } from "@/lib/pricing";
 import { SUPPORTED_MODEL_KINDS, type ModelKind } from "./scene-content";
 
-const SceneCanvas = dynamic(() => import("./scene-canvas"), { ssr: false });
+const SceneCanvas = dynamic(() => import("./scene-canvas").then((m) => m.SceneCanvas), {
+  ssr: false,
+});
 
 export interface ModelSceneProps {
   modelConfig: { kind?: string; [key: string]: unknown } | null;
