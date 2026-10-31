@@ -7,19 +7,19 @@
    ========================================================================== */
 
 :root {
-  /* Palette */
-  --color-ivory: #f6f3ed;
-  --color-charcoal: #20201e;
-  --color-stone: #d9d1c5;
-  --color-bronze: #a88c69;
-  --color-fog: #898781;
-  --color-paper: #ffffff;
-  --color-ink: #171716;
-  --color-line: #e6e0d6;
-  --color-success: #5c7c57;
-  --color-warning: #b98a3e;
-  --color-danger: #b0563f;
-  --color-info: #577b8c;
+  /* Palette — RGB triplets (consume via rgb(var(--color-X) / <alpha-value>)) */
+  --color-ivory: 246 243 237;
+  --color-charcoal: 32 32 30;
+  --color-stone: 217 209 197;
+  --color-bronze: 168 140 105;
+  --color-fog: 137 135 129;
+  --color-paper: 255 255 255;
+  --color-ink: 23 23 22;
+  --color-line: 230 224 214;
+  --color-success: 92 124 87;
+  --color-warning: 185 138 62;
+  --color-danger: 176 86 63;
+  --color-info: 87 123 140;
 
   /* Typography */
   --font-display: "Playfair Display", "Cormorant Garamond", Georgia, "Times New Roman", serif;
@@ -33,7 +33,7 @@
 }
 
 * {
-  border-color: var(--color-line);
+  border-color: rgb(var(--color-line));
 }
 
 html {
@@ -42,8 +42,8 @@ html {
 }
 
 body {
-  background: var(--color-ivory);
-  color: var(--color-ink);
+  background: rgb(var(--color-ivory));
+  color: rgb(var(--color-ink));
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.7;
@@ -53,13 +53,13 @@ body {
 }
 
 ::selection {
-  background: var(--color-bronze);
-  color: var(--color-paper);
+  background: rgb(var(--color-bronze));
+  color: rgb(var(--color-paper));
 }
 
 /* Focus visibility for accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-bronze);
+  outline: 2px solid rgb(var(--color-bronze));
   outline-offset: 2px;
 }
 
@@ -105,15 +105,15 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-ivory);
+  background: rgb(var(--color-ivory));
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-stone);
+  background: rgb(var(--color-stone));
   border-radius: 999px;
-  border: 2px solid var(--color-ivory);
+  border: 2px solid rgb(var(--color-ivory));
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-bronze);
+  background: rgb(var(--color-bronze));
 }
 
 /* Hide number input spinners */
