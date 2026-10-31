@@ -31,8 +31,9 @@
 - **Visual asset library**: deterministic vector renderer (`scripts/generate-assets.mjs`)
   generates 176 WebP assets under `public/assets` (30 product sets with
   hero/front/side/detail/lifestyle, 8 category banners, 5 collection banners, 12
-  interiors, manifest); the set is committed to the branch and re-generated at build
-  time via `prebuild`. Components prefer these local assets with database fallback.
+  interiors, manifest); the set is re-generated at build time via `prebuild` (the
+  binaries themselves are not committed — they are produced deterministically on every
+  deploy). Components prefer these local assets with database fallback.
 - **Apps**: public site pages (home, shop, product, collections, brands, designers,
   sell, contact, legal), customer account, seller dashboard (products/variants, orders,
   payouts, settings), admin dashboard (users, sellers, products moderation, orders,
@@ -40,12 +41,23 @@
 - **API**: `/api/search` route + server actions for checkout/cart/configurations/
   wishlist/reviews/contact/newsletter/admin/seller flows.
 
-## Verification (last full run — green except build-in-sandbox)
+## Verification (current)
 - `npm run typecheck` → exit 0.
 - `npm run test` → 40 passed, 4 skipped (integration/order-flow needs live Supabase).
-- `npm run build` (`next build`) → runs on Vercel (sandbox heap cap OOMs a full local
-  build). Vercel deploy: READY with runtime PASSED (200) on the entry page.
-- Assets committed to branch: `git ls-tree HEAD public/` → 176 files.
+- Public catalog reads use `createPublicClient()` (anon key, RLS) — never the
+  service-role key. Public review reads were moved to the same anon client
+  (commit a802b5d) so `/products/[slug]` no longer throws when
+  `SUPABASE_SERVICE_ROLE_KEY` is absent from the environment; verified locally
+  (typecheck/tests green).
+- Deployed asset probes (live site): `/assets/products/*/hero|front|side|detail|lifestyle.webp`,
+  `/assets/categories/*.webp`, `/assets/collections/*.webp`, `/assets/interiors/*.webp`,
+  `/assets/manifest.json` → all 200.
+- **Deployment state**: the live site is on the previous harness deploy (commit
+  3415596). The product-page fix (a802b5d) is committed but not yet deployed;
+  `/products/[slug]` on the live site is still 500 until a build of a802b5d ships.
+  `deploy_status` is currently blocked by an external error ("Database settings could
+  not sync to Vercel — reconnect the service or retry"), so deployment cannot be
+  verified with the tool until the Vercel ↔ Supabase link is reconnected.
 
 ## Known limitations / not yet verified
 - **Payments**: default provider is `test` (sandbox). Real charges require Stripe env
@@ -58,7 +70,11 @@
   production build passes without the optional package installed.
 - **Offline render runtime**: `scripts/render/runtime.ts` is excluded from `tsc`
   (browser-only tool); `scripts/render/runtime.mjs` (bundle) is not committed.
-- **Deployment**: Vercel deploy status tracked separately at end of work.
+- **Asset binaries**: 176 WebP files are generated deterministically at deploy time
+  (`prebuild`) and are served by the live site, but the binary files are not committed
+  to git (sandbox commit channel is text-only and harness re-syncs wipe local binary
+  commits). Re-run `npm run generate:assets` in a local checkout and push to store the
+  binaries in the repo.
 
 ## Required external credentials
 See `.env.example` (Supabase URL/anon/service-role; payment provider keys; email
