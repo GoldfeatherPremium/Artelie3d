@@ -8,7 +8,7 @@ export interface ReviewView {
   createdAt: string;
   verifiedPurchase: boolean;
   helpfulCount: number;
-  author: { fullName: string | null } | null;
+  authorName: string | null;
 }
 
 export async function getProductReviews(productId: string, limit = 12): Promise<ReviewView[]> {
@@ -42,7 +42,7 @@ export async function getProductReviews(productId: string, limit = 12): Promise<
       createdAt: r.created_at,
       verifiedPurchase: r.verified_purchase,
       helpfulCount: r.helpful_count,
-      author,
+      authorName: author?.full_name ?? null,
     };
   });
 }
