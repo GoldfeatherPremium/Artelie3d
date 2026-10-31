@@ -60,11 +60,13 @@ function messageAuthor(message: TicketMessage): string {
 
 interface TicketPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }
 
-export default async function AdminTicketPage({ params }: TicketPageProps) {
+export default async function AdminTicketPage({ params, searchParams }: TicketPageProps) {
   await requireRole(["admin"]);
   const { id } = await params;
+  const sp = await searchParams;
   const db = createServiceClient();
 
   const { data } = await db
@@ -101,6 +103,12 @@ export default async function AdminTicketPage({ params }: TicketPageProps) {
           </div>
         </div>
       </div>
+
+      {sp.error ? (
+        <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-sm text-danger" role="alert">
+          {sp.error}
+        </p>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3">
