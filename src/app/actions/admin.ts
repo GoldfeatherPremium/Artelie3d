@@ -638,7 +638,7 @@ const couponFormSchema = z.object({
 /** Create or update a coupon (an id means "update"). Form action. */
 export async function saveCoupon(formData: FormData): Promise<void> {
   await requireRole(["admin"]);
-  const fail = (message: string) => redirect(`/admin/coupons?error=${encodeURIComponent(message)}`);
+  const fail = (message: string): never => redirect(`/admin/coupons?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const raw: Record<string, unknown> = {
@@ -750,7 +750,7 @@ export async function reviewReview(
 /** Reply to a support ticket as an admin. Form action. */
 export async function replyTicket(ticketId: string, body?: string | FormData): Promise<void> {
   await requireRole(["admin"]);
-  const fail = (message: string) => redirect(`/admin/support/${ticketId}?error=${encodeURIComponent(message)}`);
+  const fail = (message: string): never => redirect(`/admin/support/${ticketId}?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const message = body instanceof FormData ? (formText(body, "body") ?? "").trim() : (body ?? "").trim();
@@ -849,7 +849,7 @@ const categoryFormSchema = z.object({
 /** Create or update a category (an id means "update"). Form action. */
 export async function saveCategory(formData: FormData): Promise<void> {
   await requireRole(["admin"]);
-  const fail = (message: string) => redirect(`/admin/categories?error=${encodeURIComponent(message)}`);
+  const fail = (message: string): never => redirect(`/admin/categories?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const raw: Record<string, unknown> = {
@@ -899,7 +899,7 @@ export async function saveCategory(formData: FormData): Promise<void> {
 /** Persist platform settings JSON to analytics_events (event_type = platform_settings). Form action. */
 export async function savePlatformSettings(input: unknown | FormData): Promise<void> {
   await requireRole(["admin"]);
-  const fail = (message: string) => redirect(`/admin/settings?error=${encodeURIComponent(message)}`);
+  const fail = (message: string): never => redirect(`/admin/settings?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     let parsed: unknown;
@@ -963,7 +963,7 @@ export async function updateOrderStatusAdmin(
 /** Admin-requested refund for an order (amount in USD from the form). Form action. */
 export async function adminRequestRefund(orderId: string, formData: FormData): Promise<void> {
   await requireRole(["admin"]);
-  const fail = (message: string) => redirect(`/admin/orders/${orderId}?error=${encodeURIComponent(message)}`);
+  const fail = (message: string): never => redirect(`/admin/orders/${orderId}?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const amountStr = formText(formData, "amount");
