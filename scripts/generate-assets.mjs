@@ -11,10 +11,13 @@
  * be run to replace these with raster renders of the actual 3D geometry; the
  * same paths and names are used.
  */
+import { createRequire } from "node:module";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import sharp from "sharp";
+
+const require = createRequire(import.meta.url);
+const sharp = require("sharp");
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(here, "..");
@@ -342,7 +345,6 @@ function productSvg(kind, view) {
 function lifestyleInner(kind) {
   const t = tr("hero");
   const body = SHAPES[kind].map((s) => shapeToSvg(s, t)).join("\n");
-  // Move the product to the left third of a room scene.
   const shift = `<g transform="translate(-260,120) scale(0.78)">${body}</g>`;
   return `
     <rect x="500" y="150" width="320" height="420" fill="#ffe9c9" opacity="0.85"/>
