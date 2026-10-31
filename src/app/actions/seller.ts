@@ -160,9 +160,13 @@ const sellerOnboardingSchema = z.object({
   tax_id: z.string().trim().max(60).optional(),
 });
 
-/** Submit (or re-submit) a seller application. */
+/**
+ * Submit (or re-submit) a seller application. Any authenticated user may apply;
+ * an admin approves the application (which activates the store).
+ */
 export async function requestSellerOnboarding(formData: FormData): Promise<ActionResult> {
-  await requireRole(["seller"]);
+  const user = await getUser();
+  if (!user) return { ok: false, error: "Please sign in before applying." };
   try {
     const parsed = sellerOnboardingSchema.safeParse({
       business_name: formText(formData, "business_name"),
@@ -173,9 +177,6 @@ export async function requestSellerOnboarding(formData: FormData): Promise<Actio
       tax_id: formText(formData, "tax_id"),
     });
     if (!parsed.success) return { ok: false, error: joinIssues(parsed.error) };
-
-    const user = await getUser();
-    if (!user) return { ok: false, error: "Please sign in." };
 
     const db = createServiceClient();
     const { data: existing } = await db
@@ -369,7 +370,7 @@ export async function listSellerProducts(): Promise<SellerProductView[]> {
     .order("created_at", { ascending: false });
   if (error) return [];
 
-  const rows = (data ?? []) as {
+  const rows = (data ?? []) as unknown as {
     id: string;
     name: string;
     slug: string;
@@ -618,7 +619,7 @@ export async function listSellerOrders(): Promise<SellerOrderView[]> {
     .limit(300);
   if (itemsError) return [];
 
-  const items = (itemRows ?? []) as {
+  const items = (itemRows ?? []) as unknown as {
     id: string;
     order_id: string;
     product_id: string;
@@ -637,7 +638,7 @@ export async function listSellerOrders(): Promise<SellerOrderView[]> {
     .select("id, order_number, status, grand_total_cents, placed_at, created_at, guest_email, profiles(email, full_name)")
     .in("id", orderIds);
 
-  const orders = (orderRows ?? []) as {
+  const orders = (orderRows ?? []) as unknown as {
     id: string;
     order_number: string;
     status: string;
@@ -863,7 +864,7 @@ export async function getSellerAnalytics(): Promise<SellerAnalytics> {
       .eq("status", "pending_review"),
   ]);
 
-  const items = (itemRows ?? []) as {
+  const items = (itemRows ?? []) as unknown as {
     id: string;
     order_id: string;
     product_id: string;
@@ -871,11 +872,18 @@ export async function getSellerAnalytics(): Promise<SellerAnalytics> {
     image_url: string | null;
     quantity: number;
     line_total_cents: number;
-    orders: { id: string; status: string } | null;
+    orders:
+      | { id: string; status: string }
+      | { id: string; status: string }[]
+      | null;
   }[];
 
   const EXCLUDED = new Set(["cancelled", "refunded"]);
-  const qualifying = items.filter((item) => item.orders && !EXCLUDED.has(item.orders.status));
+  const qualifying = items.filter((item) => {
+    if (!item.orders) return false;
+    const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+    return order ? !EXCLUDED.has(order.status) : false;
+  });
 
   const revenueCents = qualifying.reduce((sum, item) => sum + item.line_total_cents, 0);
   const orderIds = new Set(qualifying.map((item) => item.order_id));
