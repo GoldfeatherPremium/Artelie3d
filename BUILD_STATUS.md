@@ -28,10 +28,11 @@
 - **3D**: procedural model scenes for 30 model kinds (sofas, chairs, tables, desks,
   beds, storage, lighting, decor), configurator with live material swapping, showroom,
   functional room designer, hero scene; motion/react for animation.
-- **Visual asset library**: offline render pipeline (`scripts/render`) generates
-  original product photography (hero/front/side/detail/lifestyle per product), category
-  and collection banners, and 12 interior scenes from the same 3D geometry the viewer
-  uses. Components prefer these local assets with database fallback.
+- **Visual asset library**: deterministic vector renderer (`scripts/generate-assets.mjs`)
+  generates 176 WebP assets under `public/assets` (30 product sets with
+  hero/front/side/detail/lifestyle, 8 category banners, 5 collection banners, 12
+  interiors, manifest); the set is committed to the branch and re-generated at build
+  time via `prebuild`. Components prefer these local assets with database fallback.
 - **Apps**: public site pages (home, shop, product, collections, brands, designers,
   sell, contact, legal), customer account, seller dashboard (products/variants, orders,
   payouts, settings), admin dashboard (users, sellers, products moderation, orders,
@@ -39,11 +40,12 @@
 - **API**: `/api/search` route + server actions for checkout/cart/configurations/
   wishlist/reviews/contact/newsletter/admin/seller flows.
 
-## Verification (last full run — all green)
+## Verification (last full run — green except build-in-sandbox)
 - `npm run typecheck` → exit 0.
 - `npm run test` → 40 passed, 4 skipped (integration/order-flow needs live Supabase).
-- `npm run build` (`next build`) → compiled successfully; route map verified
-  (`/account/*`, `/admin/*`, `/seller/*` present; no parallel-route collisions).
+- `npm run build` (`next build`) → runs on Vercel (sandbox heap cap OOMs a full local
+  build). Vercel deploy: READY with runtime PASSED (200) on the entry page.
+- Assets committed to branch: `git ls-tree HEAD public/` → 176 files.
 
 ## Known limitations / not yet verified
 - **Payments**: default provider is `test` (sandbox). Real charges require Stripe env
@@ -55,7 +57,7 @@
   the `stripe` package is intentionally imported lazily via `createRequire` so the
   production build passes without the optional package installed.
 - **Offline render runtime**: `scripts/render/runtime.ts` is excluded from `tsc`
-  (browser-only tool); it is validated by execution in the headless render pipeline.
+  (browser-only tool); `scripts/render/runtime.mjs` (bundle) is not committed.
 - **Deployment**: Vercel deploy status tracked separately at end of work.
 
 ## Required external credentials
