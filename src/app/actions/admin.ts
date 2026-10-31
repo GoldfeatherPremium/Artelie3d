@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { redirect } from "next/navigation";
 import { requireRole, getUserRole } from "@/lib/auth/roles";
 import { getUser } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
@@ -634,9 +635,10 @@ const couponFormSchema = z.object({
     .default(true),
 });
 
-/** Create or update a coupon (an id means "update"). */
-export async function saveCoupon(formData: FormData): Promise<ActionResult> {
+/** Create or update a coupon (an id means "update"). Form action. */
+export async function saveCoupon(formData: FormData): Promise<void> {
   await requireRole(["admin"]);
+  const fail = (message: string) => redirect(`/admin/coupons?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const raw: Record<string, unknown> = {
@@ -655,16 +657,16 @@ export async function saveCoupon(formData: FormData): Promise<ActionResult> {
     };
     const parsed = couponFormSchema.safeParse(raw);
     if (!parsed.success) {
-      return { ok: false, error: parsed.error.issues.map((i) => i.message).join("; ") };
+      fail(parsed.error.issues.map((i) => i.message).join("; "));
     }
     const data = parsed.data;
     const db = createServiceClient();
 
     if (data.id) {
       const { error } = await db.from("coupons").update(data).eq("id", data.id);
-      if (error) return { ok: false, error: error.message };
+      if (error) fail(error.message);
       await writeAudit({ action: "coupon.update", entityType: "coupons", entityId: data.id, after: data, actor });
-      return { ok: true };
+      return;
     }
 
     const { data: created, error } = await db
@@ -672,11 +674,11 @@ export async function saveCoupon(formData: FormData): Promise<ActionResult> {
       .insert({ ...data, used_count: 0 })
       .select("id")
       .maybeSingle();
-    if (error || !created) return { ok: false, error: error?.message ?? "Failed to create coupon" };
+    if (error || !created) fail(error?.message ?? "Failed to create coupon");
     await writeAudit({ action: "coupon.create", entityType: "coupons", entityId: (created as { id: string }).id, after: data, actor });
-    return { ok: true };
   } catch (err) {
-    return { ok: false, error: errorMessage(err) };
+    if (err instanceof Error && err.message.startsWith("NEXT_REDIRECT")) throw err;
+    fail(errorMessage(err));
   }
 }
 
@@ -745,13 +747,14 @@ export async function reviewReview(
   }
 }
 
-/** Reply to a support ticket as an admin. */
-export async function replyTicket(ticketId: string, body?: string | FormData): Promise<ActionResult> {
+/** Reply to a support ticket as an admin. Form action. */
+export async function replyTicket(ticketId: string, body?: string | FormData): Promise<void> {
   await requireRole(["admin"]);
+  const fail = (message: string) => redirect(`/admin/support/${ticketId}?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const message = body instanceof FormData ? (formText(body, "body") ?? "").trim() : (body ?? "").trim();
-    if (!message) return { ok: false, error: "Reply cannot be empty" };
+    if (!message) fail("Reply cannot be empty");
 
     const db = createServiceClient();
     const { data: ticket } = await db
@@ -759,7 +762,7 @@ export async function replyTicket(ticketId: string, body?: string | FormData): P
       .select("id, user_id, subject, status")
       .eq("id", ticketId)
       .maybeSingle();
-    if (!ticket) return { ok: false, error: "Ticket not found" };
+    if (!ticket) fail("Ticket not found");
     const t = ticket as { id: string; user_id: string; subject: string; status: string };
 
     const { error: insertError } = await db.from("support_messages").insert({
@@ -768,7 +771,7 @@ export async function replyTicket(ticketId: string, body?: string | FormData): P
       author_role: "admin",
       body: message,
     });
-    if (insertError) return { ok: false, error: insertError.message };
+    if (insertError) fail(insertError.message);
 
     await notifyUser({
       userId: t.user_id,
@@ -785,9 +788,9 @@ export async function replyTicket(ticketId: string, body?: string | FormData): P
       after: { body: message },
       actor,
     });
-    return { ok: true };
   } catch (err) {
-    return { ok: false, error: errorMessage(err) };
+    if (err instanceof Error && err.message.startsWith("NEXT_REDIRECT")) throw err;
+    fail(errorMessage(err));
   }
 }
 
@@ -843,9 +846,10 @@ const categoryFormSchema = z.object({
   sort_order: z.preprocess((value) => (value === "" || value == null ? 0 : value), z.coerce.number().int()).default(0),
 });
 
-/** Create or update a category (an id means "update"). */
-export async function saveCategory(formData: FormData): Promise<ActionResult> {
+/** Create or update a category (an id means "update"). Form action. */
+export async function saveCategory(formData: FormData): Promise<void> {
   await requireRole(["admin"]);
+  const fail = (message: string) => redirect(`/admin/categories?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const raw: Record<string, unknown> = {
@@ -859,18 +863,18 @@ export async function saveCategory(formData: FormData): Promise<ActionResult> {
     };
     const parsed = categoryFormSchema.safeParse(raw);
     if (!parsed.success) {
-      return { ok: false, error: parsed.error.issues.map((i) => i.message).join("; ") };
+      fail(parsed.error.issues.map((i) => i.message).join("; "));
     }
     const data = parsed.data;
     const slug = data.slug || slugify(data.name);
     const db = createServiceClient();
 
     if (data.id) {
-      if (data.parent_id === data.id) return { ok: false, error: "Category cannot be its own parent" };
+      if (data.parent_id === data.id) fail("Category cannot be its own parent");
       const { error } = await db.from("categories").update({ ...data, slug }).eq("id", data.id);
-      if (error) return { ok: false, error: error.message };
+      if (error) fail(error.message);
       await writeAudit({ action: "category.update", entityType: "categories", entityId: data.id, after: { ...data, slug }, actor });
-      return { ok: true };
+      return;
     }
 
     const { data: created, error } = await db
@@ -878,7 +882,7 @@ export async function saveCategory(formData: FormData): Promise<ActionResult> {
       .insert({ ...data, slug })
       .select("id")
       .maybeSingle();
-    if (error || !created) return { ok: false, error: error?.message ?? "Failed to create category" };
+    if (error || !created) fail(error?.message ?? "Failed to create category");
     await writeAudit({
       action: "category.create",
       entityType: "categories",
@@ -886,27 +890,28 @@ export async function saveCategory(formData: FormData): Promise<ActionResult> {
       after: { ...data, slug },
       actor,
     });
-    return { ok: true };
   } catch (err) {
-    return { ok: false, error: errorMessage(err) };
+    if (err instanceof Error && err.message.startsWith("NEXT_REDIRECT")) throw err;
+    fail(errorMessage(err));
   }
 }
 
-/** Persist platform settings JSON to analytics_events (event_type = platform_settings). */
-export async function savePlatformSettings(input: unknown | FormData): Promise<ActionResult> {
+/** Persist platform settings JSON to analytics_events (event_type = platform_settings). Form action. */
+export async function savePlatformSettings(input: unknown | FormData): Promise<void> {
   await requireRole(["admin"]);
+  const fail = (message: string) => redirect(`/admin/settings?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     let parsed: unknown;
     if (input instanceof FormData) {
       const raw = formText(input, "json");
-      if (!raw) return { ok: false, error: "Settings JSON is required" };
+      if (!raw) fail("Settings JSON is required");
       parsed = JSON.parse(raw);
     } else {
       parsed = input;
     }
     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-      return { ok: false, error: "Settings must be a JSON object" };
+      fail("Settings must be a JSON object");
     }
     const db = createServiceClient();
     const { data: event, error } = await db
@@ -914,7 +919,7 @@ export async function savePlatformSettings(input: unknown | FormData): Promise<A
       .insert({ event_type: "platform_settings", properties: parsed })
       .select("id")
       .maybeSingle();
-    if (error || !event) return { ok: false, error: error?.message ?? "Failed to save settings" };
+    if (error || !event) fail(error?.message ?? "Failed to save settings");
     await writeAudit({
       action: "platform.settings.save",
       entityType: "analytics_events",
@@ -922,9 +927,9 @@ export async function savePlatformSettings(input: unknown | FormData): Promise<A
       after: parsed,
       actor,
     });
-    return { ok: true };
   } catch (err) {
-    return { ok: false, error: errorMessage(err) };
+    if (err instanceof Error && err.message.startsWith("NEXT_REDIRECT")) throw err;
+    fail(errorMessage(err));
   }
 }
 
@@ -955,16 +960,17 @@ export async function updateOrderStatusAdmin(
   }
 }
 
-/** Admin-requested refund for an order (amount in USD from the form). */
-export async function adminRequestRefund(orderId: string, formData: FormData): Promise<ActionResult> {
+/** Admin-requested refund for an order (amount in USD from the form). Form action. */
+export async function adminRequestRefund(orderId: string, formData: FormData): Promise<void> {
   await requireRole(["admin"]);
+  const fail = (message: string) => redirect(`/admin/orders/${orderId}?error=${encodeURIComponent(message)}`);
   try {
     const actor = await getActor();
     const amountStr = formText(formData, "amount");
     const reason = formText(formData, "reason") ?? "";
     const amount = Number(amountStr);
     if (!Number.isFinite(amount) || amount <= 0) {
-      return { ok: false, error: "Enter a valid refund amount" };
+      fail("Enter a valid refund amount");
     }
     const amountCents = Math.round(amount * 100);
     const result = await refundOrder(orderId, amountCents, reason, actor.id);
@@ -975,8 +981,8 @@ export async function adminRequestRefund(orderId: string, formData: FormData): P
       after: { refundId: result.refundId, amount_cents: amountCents, reason },
       actor,
     });
-    return { ok: true };
   } catch (err) {
-    return { ok: false, error: errorMessage(err) };
+    if (err instanceof Error && err.message.startsWith("NEXT_REDIRECT")) throw err;
+    fail(errorMessage(err));
   }
 }
