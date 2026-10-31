@@ -1,9 +1,11 @@
-import { createServiceClient } from "@/lib/supabase/admin";
+import { createPublicClient } from "@/lib/supabase/server";
 
 /**
- * Server-side catalog queries (public data). Uses the service client so public
- * read paths work uniformly; all reads are filtered to `status = 'approved'`
- * except where a caller explicitly requests draft/pending rows (seller/admin).
+ * Server-side catalog queries (public data). Uses the public anon-key client
+ * so published rows are read under RLS (see 0002_rls.sql) — this never
+ * requires the service-role credential. All reads are filtered to
+ * `status = 'approved'` except where a caller explicitly requests
+ * draft/pending rows (seller/admin use their own service client).
  */
 
 export interface CatalogProduct {
@@ -183,7 +185,7 @@ export async function listProducts(params: ProductListParams = {}): Promise<Prod
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const db = createServiceClient();
+  const db = createPublicClient();
   let query = db.from("products").select(PUBLIC_SELECT, { count: "exact" }).eq("status", "approved");
 
   if (params.categorySlug) {
@@ -230,7 +232,7 @@ export async function listProducts(params: ProductListParams = {}): Promise<Prod
 }
 
 export async function getProductBySlug(slug: string): Promise<CatalogProduct | null> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("products")
     .select(PUBLIC_SELECT)
@@ -243,7 +245,7 @@ export async function getProductBySlug(slug: string): Promise<CatalogProduct | n
 }
 
 export async function getProductById(id: string): Promise<CatalogProduct | null> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("products")
     .select(PUBLIC_SELECT)
@@ -256,7 +258,7 @@ export async function getProductById(id: string): Promise<CatalogProduct | null>
 }
 
 export async function getRelatedProducts(product: CatalogProduct, limit = 4): Promise<CatalogProduct[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
 
   let query = db
     .from("products")
@@ -290,7 +292,7 @@ export async function getRelatedProducts(product: CatalogProduct, limit = 4): Pr
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<CatalogProduct[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("products")
     .select(PUBLIC_SELECT)
@@ -304,7 +306,7 @@ export async function getFeaturedProducts(limit = 8): Promise<CatalogProduct[]> 
 }
 
 export async function getBestsellers(limit = 8): Promise<CatalogProduct[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("products")
     .select(PUBLIC_SELECT)
@@ -317,7 +319,7 @@ export async function getBestsellers(limit = 8): Promise<CatalogProduct[]> {
 }
 
 export async function listCategories(withCounts = false): Promise<CategoryRow[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("categories")
     .select("id, name, slug, description, image_url, sort_order")
@@ -340,7 +342,7 @@ export async function listCategories(withCounts = false): Promise<CategoryRow[]>
 }
 
 export async function getCategoryBySlug(slug: string): Promise<CategoryRow | null> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("categories")
     .select("id, name, slug, description, image_url, sort_order")
@@ -352,7 +354,7 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryRow | nul
 }
 
 export async function listCollections(): Promise<CollectionRow[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("collections")
     .select("id, name, slug, description, hero_image_url")
@@ -364,7 +366,7 @@ export async function listCollections(): Promise<CollectionRow[]> {
 }
 
 export async function getCollectionBySlug(slug: string): Promise<CollectionRow | null> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("collections")
     .select("id, name, slug, description, hero_image_url")
@@ -377,7 +379,7 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionRow |
 }
 
 export async function listBrands(): Promise<BrandRow[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("brands")
     .select("id, name, slug, logo_url, description")
@@ -389,7 +391,7 @@ export async function listBrands(): Promise<BrandRow[]> {
 }
 
 export async function getBrandBySlug(slug: string): Promise<BrandRow | null> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("brands")
     .select("id, name, slug, logo_url, description")
@@ -402,7 +404,7 @@ export async function getBrandBySlug(slug: string): Promise<BrandRow | null> {
 }
 
 export async function listStores(): Promise<StoreRow[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("stores")
     .select("id, name, slug, description, logo_url")
@@ -416,7 +418,7 @@ export async function listStores(): Promise<StoreRow[]> {
 export async function searchSuggestions(q: string, limit = 6): Promise<SearchSuggestion[]> {
   const term = q.trim();
   if (!term) return [];
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("products")
     .select(`id, name, slug, base_price_cents, sale_price_cents, product_images(url, position)`)
