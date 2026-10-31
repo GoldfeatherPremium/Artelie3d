@@ -87,8 +87,9 @@ function cyl(
   pos: [number, number, number] = [0, 0, 0],
   rot: [number, number, number] = [0, 0, 0],
   segments = 48,
+  openEnded = false,
 ) {
-  return mesh(name, new THREE.CylinderGeometry(rTop, rBottom, h, segments), material, pos, rot);
+  return mesh(name, new THREE.CylinderGeometry(rTop, rBottom, h, segments, 1, openEnded), material, pos, rot);
 }
 
 function taperedLegs(
