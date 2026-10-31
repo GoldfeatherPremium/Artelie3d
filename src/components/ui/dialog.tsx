@@ -23,11 +23,13 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
   return <DialogContext.Provider value={value}>{children}</DialogContext.Provider>;
 }
 
-export interface DialogContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onDrag"> {
+export interface DialogContentProps {
+  className?: string;
   hideClose?: boolean;
+  children?: React.ReactNode;
 }
 
-function DialogContent({ className, hideClose, children, ...props }: DialogContentProps) {
+function DialogContent({ className, hideClose, children }: DialogContentProps) {
   const { open, onOpenChange } = React.useContext(DialogContext);
 
   React.useEffect(() => {
@@ -67,7 +69,6 @@ function DialogContent({ className, hideClose, children, ...props }: DialogConte
               "relative z-10 w-full max-w-lg overflow-hidden rounded-2xl bg-paper shadow-overlay",
               className,
             )}
-            {...props}
           >
             {!hideClose && (
               <button
