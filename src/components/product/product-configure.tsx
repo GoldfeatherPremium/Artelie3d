@@ -25,6 +25,7 @@ import {
   PricingValidationError,
   type CustomizationSchema,
   type CustomizationGroup,
+  type MaterialOverride,
 } from "@/lib/pricing";
 import { saveConfiguration } from "@/app/actions/configurations";
 import { AddToCartButton } from "./add-to-cart";
@@ -46,6 +47,15 @@ function defaultOptions(groups: CustomizationGroup[]): Record<string, string> {
     if (group.options.length > 0) out[group.key] = group.options[0].value;
   }
   return out;
+}
+
+/** Re-key a customization material map from group keys to mesh part names. */
+function materialsByPart(materials: Record<string, MaterialOverride>): Record<string, MaterialOverride> {
+  const byPart: Record<string, MaterialOverride> = {};
+  for (const value of Object.values(materials)) {
+    if (value?.name) byPart[value.name] = value;
+  }
+  return byPart;
 }
 
 export function ProductConfigure({ product }: ProductConfigureProps) {
@@ -74,7 +84,10 @@ export function ProductConfigure({ product }: ProductConfigureProps) {
     }
   }, [product, options]);
 
-  const materials = React.useMemo(() => buildMaterialMap(product.schema, options), [product.schema, options]);
+  const materials = React.useMemo(
+    () => materialsByPart(buildMaterialMap(product.schema, options)),
+    [product.schema, options],
+  );
   const unitPriceCents = priced?.unitPriceCents ?? product.salePriceCents ?? product.basePriceCents;
   const lineTotalCents = unitPriceCents * quantity;
 
