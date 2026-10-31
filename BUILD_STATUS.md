@@ -25,8 +25,13 @@
   (`PAYMENT_PROVIDER=stripe` + keys). Webhook signature verification + idempotent
   `payment_events` upsert.
 - **Email abstraction**: default `console` logger; Resend/SMTP adapters env-gated.
-- **3D**: procedural model scenes (armchair/sofa/table), configurator, showroom,
-  room-designer landing, hero scene; motion/react for animation.
+- **3D**: procedural model scenes for 30 model kinds (sofas, chairs, tables, desks,
+  beds, storage, lighting, decor), configurator with live material swapping, showroom,
+  functional room designer, hero scene; motion/react for animation.
+- **Visual asset library**: offline render pipeline (`scripts/render`) generates
+  original product photography (hero/front/side/detail/lifestyle per product), category
+  and collection banners, and 12 interior scenes from the same 3D geometry the viewer
+  uses. Components prefer these local assets with database fallback.
 - **Apps**: public site pages (home, shop, product, collections, brands, designers,
   sell, contact, legal), customer account, seller dashboard (products/variants, orders,
   payouts, settings), admin dashboard (users, sellers, products moderation, orders,
@@ -49,6 +54,8 @@
 - **Stripe provider build warning**: webpack "critical dependency" warning is expected —
   the `stripe` package is intentionally imported lazily via `createRequire` so the
   production build passes without the optional package installed.
+- **Offline render runtime**: `scripts/render/runtime.ts` is excluded from `tsc`
+  (browser-only tool); it is validated by execution in the headless render pipeline.
 - **Deployment**: Vercel deploy status tracked separately at end of work.
 
 ## Required external credentials
