@@ -13,7 +13,7 @@ const ROLE_LEVEL: Record<UserRole, number> = {
  * Role hierarchy: customer < seller < admin. Passing "customer" in the
  * required list means "any authenticated user".
  */
-function hasRole(role: UserRole, required: UserRole[]): boolean {
+export function hasRole(role: UserRole, required: UserRole[]): boolean {
   if (required.length === 0) return false;
   if (required.includes("customer")) return true;
   const maxRequired = Math.max(...required.map((r) => ROLE_LEVEL[r]));
