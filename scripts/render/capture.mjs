@@ -25,7 +25,7 @@ if (!jobsFile) {
 const jobsFileAbs = isAbsolute(jobsFile) ? jobsFile : join(process.cwd(), jobsFile);
 const jobs = JSON.parse(readFileSync(jobsFileAbs, "utf8"));
 
-const CONCURRENCY = 3;
+const CONCURRENCY = 2;
 
 const browser = await puppeteer.launch({
   headless: "shell",
