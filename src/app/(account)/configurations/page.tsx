@@ -11,7 +11,7 @@ export default async function ConfigurationsPage() {
 
   const { data } = await db
     .from("product_configurations")
-    .select("id, name, options, option_summary, unit_price_cents, share_token, products(name, slug, product_images(url, position))")
+    .select("id, name, options, option_summary, unit_price_cents, share_token, products(id, name, slug, product_images(url, position))")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -23,6 +23,7 @@ export default async function ConfigurationsPage() {
     unit_price_cents: number;
     share_token: string | null;
     products: {
+      id: string;
       name: string;
       slug: string;
       product_images: { url: string; position: number }[];
@@ -69,7 +70,7 @@ export default async function ConfigurationsPage() {
                     ) : null}
                     <ConfigActions
                       configId={config.id}
-                      productId=""
+                      productId={config.products?.id ?? ""}
                       options={config.options}
                       shareToken={config.share_token}
                       initialName={config.name}
