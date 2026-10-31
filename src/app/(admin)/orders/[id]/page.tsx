@@ -25,6 +25,7 @@ export const dynamic = "force-dynamic";
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }
 
 interface OrderDetailData {
@@ -117,9 +118,10 @@ function addressLines(address: Record<string, unknown> | null): string[] {
   return lines;
 }
 
-export default async function AdminOrderDetailPage({ params }: OrderDetailPageProps) {
+export default async function AdminOrderDetailPage({ params, searchParams }: OrderDetailPageProps) {
   await requireRole(["admin"]);
   const { id } = await params;
+  const sp = await searchParams;
   const db = createServiceClient();
 
   const { data } = await db
@@ -163,6 +165,12 @@ export default async function AdminOrderDetailPage({ params }: OrderDetailPagePr
         </div>
         <Badge variant={orderStatusVariant(order.status)}>{order.status.replaceAll("_", " ")}</Badge>
       </div>
+
+      {sp.error ? (
+        <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-sm text-danger" role="alert">
+          {sp.error}
+        </p>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
