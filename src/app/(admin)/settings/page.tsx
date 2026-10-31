@@ -22,7 +22,12 @@ function prettyJson(value: unknown): string {
   }
 }
 
-export default async function AdminSettingsPage() {
+export default async function AdminSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const sp = await searchParams;
   await requireRole(["admin"]);
   const db = createServiceClient();
 
@@ -43,6 +48,12 @@ export default async function AdminSettingsPage() {
         <h1 className="font-display text-display-md text-ink">Settings</h1>
         <p className="text-body-sm text-fog">Platform-wide configuration stored as JSON.</p>
       </div>
+
+      {sp.error ? (
+        <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-sm text-danger" role="alert">
+          {sp.error}
+        </p>
+      ) : null}
 
       <Card>
         <CardHeader>
