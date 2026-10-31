@@ -103,7 +103,9 @@ export async function validateCoupon(code: string): Promise<ActionResult & { cou
   };
 
   const now = new Date();
-  const expired = (c.ends_at && now > new Date(c.ends_at)) || (c.starts_at && now < new Date(c.starts_at));
+  const expired = Boolean(
+    (c.ends_at && now > new Date(c.ends_at)) || (c.starts_at && now < new Date(c.starts_at)),
+  );
   const usageExhausted = c.usage_limit !== null && c.used_count >= c.usage_limit;
 
   if (!c.active || expired || usageExhausted) {
@@ -148,7 +150,9 @@ export interface CompleteCheckoutResult {
  * sandbox/test mode, finalize the simulated payment server-side. Real providers
  * (stripe/custom) require external webhook confirmation — never a client flag.
  */
-export async function completeCheckout(input: CompleteCheckoutInput): Promise<CompleteCheckoutResult | ActionResult> {
+export async function completeCheckout(
+  input: CompleteCheckoutInput,
+): Promise<CompleteCheckoutResult | { ok: false; error: string }> {
   try {
     const user = await getUser();
 
