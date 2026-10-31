@@ -38,8 +38,8 @@ const config: Config = {
         "body-lg": ["1.125rem", { lineHeight: "1.75" }],
         "body-md": ["1rem", { lineHeight: "1.7" }],
         "body-sm": ["0.875rem", { lineHeight: "1.6" }],
-        "caption": ["0.75rem", { lineHeight: "1.5", letterSpacing: "0.06em", textTransform: "uppercase" }],
-        "overline": ["0.6875rem", { lineHeight: "1.4", letterSpacing: "0.14em", textTransform: "uppercase" }],
+        caption: ["0.75rem", { lineHeight: "1.5", letterSpacing: "0.06em" }],
+        overline: ["0.6875rem", { lineHeight: "1.4", letterSpacing: "0.14em" }],
       },
       spacing: {
         18: "4.5rem",
