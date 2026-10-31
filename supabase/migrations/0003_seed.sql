@@ -20,17 +20,16 @@ values
 on conflict (id) do nothing;
 
 insert into auth.identities (id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
-select uuid_generate_v4(), '20000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', format('{"sub":"%s","email":"%s"}', id, email)::jsonb, 'email', now(), now(), now() from auth.users where id = '20000000-0000-4000-8000-000000000001'
-union all
-select uuid_generate_v4(), '20000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000002', format('{"sub":"%s","email":"%s"}', id, email)::jsonb, 'email', now(), now(), now() from auth.users where id = '20000000-0000-4000-8000-000000000002'
-union all
-select uuid_generate_v4(), '20000000-0000-4000-8000-000000000003', '20000000-0000-4000-8000-000000000003', format('{"sub":"%s","email":"%s"}', id, email)::jsonb, 'email', now(), now(), now() from auth.users where id = '20000000-0000-4000-8000-000000000003'
-union all
-select uuid_generate_v4(), '20000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-000000000004', format('{"sub":"%s","email":"%s"}', id, email)::jsonb, 'email', now(), now(), now() from auth.users where id = '20000000-0000-4000-8000-000000000004'
-union all
-select uuid_generate_v4(), '20000000-0000-4000-8000-000000000005', '20000000-0000-4000-8000-000000000005', format('{"sub":"%s","email":"%s"}', id, email)::jsonb, 'email', now(), now(), now() from auth.users where id = '20000000-0000-4000-8000-000000000005'
-union all
-select uuid_generate_v4(), '20000000-0000-4000-8000-000000000006', '20000000-0000-4000-8000-000000000006', format('{"sub":"%s","email":"%s"}', id, email)::jsonb, 'email', now(), now(), now() from auth.users where id = '20000000-0000-4000-8000-000000000006'
+select gen_random_uuid(), u.id::text, u.id, format('{"sub":"%s","email":"%s"}', u.id, u.email)::jsonb, 'email', now(), now(), now()
+from auth.users u
+where u.id in (
+  '20000000-0000-4000-8000-000000000001'::uuid,
+  '20000000-0000-4000-8000-000000000002'::uuid,
+  '20000000-0000-4000-8000-000000000003'::uuid,
+  '20000000-0000-4000-8000-000000000004'::uuid,
+  '20000000-0000-4000-8000-000000000005'::uuid,
+  '20000000-0000-4000-8000-000000000006'::uuid
+)
 on conflict (provider_id, provider) do nothing;
 
 -- ---------------------------------------------------------------------------
@@ -99,8 +98,6 @@ on conflict (id) do nothing;
 -- ---------------------------------------------------------------------------
 -- PRODUCTS
 -- ---------------------------------------------------------------------------
--- Product UUIDs: 80000000-0000-4000-8000-0000000000XX
-
 insert into public.products (
   id, store_id, seller_id, category_id, collection_id, brand_id,
   name, slug, description, sku, type, base_price_cents, sale_price_cents,
@@ -342,10 +339,7 @@ insert into public.reviews (id, product_id, user_id, rating, title, body, status
   ('d0000000-0000-4000-8000-000000000003', '80000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000005', 5, 'Like sitting inside a sculpture', 'The Arc chair is even better in person. The leather option is worth it.', 'approved', true),
   ('d0000000-0000-4000-8000-000000000004', '80000000-0000-4000-8000-000000000005', '20000000-0000-4000-8000-000000000006', 5, 'Solid, heavy, beautiful', 'Travertine top is stunning; construction feels permanent.', 'approved', true),
   ('d0000000-0000-4000-8000-000000000005', '80000000-0000-4000-8000-000000000008', '20000000-0000-4000-8000-000000000005', 4, 'Great work-from-home desk', 'Clean lines, cable tray is genuinely useful.', 'approved', true),
-  ('d0000000-0000-4000-8000-000000000006', '80000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-000000000006', 5, 'Flawless finish', 'The reeded doors are flawless. Worth every cent.', 'approved', true);
-
--- keep a pending review for moderation demo
-insert into public.reviews (id, product_id, user_id, rating, title, body, status, verified_purchase) values
+  ('d0000000-0000-4000-8000-000000000006', '80000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-000000000006', 5, 'Flawless finish', 'The reeded doors are flawless. Worth every cent.', 'approved', true),
   ('d0000000-0000-4000-8000-000000000007', '80000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000006', 3, 'Shipping took longer than expected', 'Product is great, but fulfillment was slow.', 'pending', true);
 
 -- ---------------------------------------------------------------------------
