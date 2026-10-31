@@ -1,23 +1,14 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/motion/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
+import { RoomDesignerLazy } from "@/components/room-designer/room-designer-lazy";
 
 export const metadata = {
   title: "Room Designer",
   description: "Design rooms with real ATELIER 3D products in your browser.",
 };
-
-const RoomDesigner = dynamic(() => import("@/components/room-designer/room-designer").then((m) => m.RoomDesigner), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-128 items-center justify-center rounded-2xl border border-line bg-paper text-fog">
-      Loading the 3D room designer…
-    </div>
-  ),
-});
 
 const STEPS = [
   {
@@ -49,7 +40,7 @@ export default function RoomDesignerPage() {
         />
 
         <Reveal className="mt-10">
-          <RoomDesigner />
+          <RoomDesignerLazy />
         </Reveal>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
