@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/lib/supabase/admin";
+import { createPublicClient } from "@/lib/supabase/server";
 
 export interface ReviewView {
   id: string;
@@ -11,8 +11,15 @@ export interface ReviewView {
   authorName: string | null;
 }
 
+/**
+ * Public review reads. Uses the public anon-key client so approved reviews are
+ * read under RLS (see 0002_rls.sql `reviews_select_public`); the reviewer's
+ * profile name is exposed only when RLS allows it (self/admin), otherwise it
+ * falls back to "Anonymous" in the UI. This never requires the service-role
+ * credential.
+ */
 export async function getProductReviews(productId: string, limit = 12): Promise<ReviewView[]> {
-  const db = createServiceClient();
+  const db = createPublicClient();
   const { data, error } = await db
     .from("reviews")
     .select("id, rating, title, body, created_at, verified_purchase, helpful_count, profiles(full_name)")
