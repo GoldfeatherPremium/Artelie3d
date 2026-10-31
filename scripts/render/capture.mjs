@@ -9,7 +9,7 @@
 import puppeteer from "puppeteer";
 import { createRequire } from "node:module";
 import { readFileSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -21,7 +21,8 @@ if (!jobsFile) {
   console.error("usage: node capture.mjs <jobs.json>");
   process.exit(1);
 }
-const jobs = JSON.parse(readFileSync(join(here, jobsFile), "utf8"));
+const jobsFileAbs = isAbsolute(jobsFile) ? jobsFile : join(process.cwd(), jobsFile);
+const jobs = JSON.parse(readFileSync(jobsFileAbs, "utf8"));
 
 const browser = await puppeteer.launch({
   headless: "shell",
