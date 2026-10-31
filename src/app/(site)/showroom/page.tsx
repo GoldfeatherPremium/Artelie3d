@@ -2,6 +2,7 @@ import { createPublicClient } from "@/lib/supabase/server";
 import { SectionHeading } from "@/components/motion/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { ShowroomClient, type ShowroomProduct } from "@/components/showroom/showroom-client";
+import { localHeroFor } from "@/lib/data/assets";
 
 export const metadata = {
   title: "3D Showroom",
@@ -28,15 +29,18 @@ export default async function ShowroomPage() {
     slug: string;
     model_config: unknown;
     product_images: { url: string; position: number }[];
-  }[]).map((row) => ({
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    modelConfig: (row.model_config as Record<string, unknown> | null) ?? null,
-    imageUrl:
+  }[]).map((row) => {
+    const dbImage =
       [...(row.product_images ?? [])]
-        .sort((a, b) => a.position - b.position)[0]?.url ?? null,
-  }));
+        .sort((a, b) => a.position - b.position)[0]?.url ?? null;
+    return {
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      modelConfig: (row.model_config as Record<string, unknown> | null) ?? null,
+      imageUrl: localHeroFor(row.slug) ?? dbImage,
+    };
+  });
 
   return (
     <div className="bg-ivory">
