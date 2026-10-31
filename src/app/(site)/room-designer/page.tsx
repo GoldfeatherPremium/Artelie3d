@@ -1,4 +1,5 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/motion/section-heading";
 import { Reveal } from "@/components/motion/reveal";
@@ -8,6 +9,15 @@ export const metadata = {
   title: "Room Designer",
   description: "Design rooms with real ATELIER 3D products in your browser.",
 };
+
+const RoomDesigner = dynamic(() => import("@/components/room-designer/room-designer").then((m) => m.RoomDesigner), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-128 items-center justify-center rounded-2xl border border-line bg-paper text-fog">
+      Loading the 3D room designer…
+    </div>
+  ),
+});
 
 const STEPS = [
   {
@@ -38,7 +48,11 @@ export default function RoomDesignerPage() {
           description="A practical 3D room planner that works with the real catalog — no downloads, no AR required."
         />
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal className="mt-10">
+          <RoomDesigner />
+        </Reveal>
+
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, index) => (
             <Reveal key={step.title} delay={index * 0.06}>
               <div className="h-full rounded-2xl border border-line bg-paper p-6 shadow-card">
@@ -53,15 +67,15 @@ export default function RoomDesignerPage() {
         <Reveal className="mt-12">
           <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-charcoal p-8 text-ivory sm:p-12 lg:flex-row lg:items-center">
             <div className="max-w-xl">
-              <h2 className="font-display text-display-md">Start a new room design</h2>
+              <h2 className="font-display text-display-md">Your rooms live in your account</h2>
               <p className="mt-3 text-body-sm text-ivory/70">
-                The Room Designer lives in your account, where your saved designs are kept. Sign
-                in (or create an account) to get started.
+                Design here in your browser, then sign in to keep a persistent library of
+                saved room designs inside your account.
               </p>
             </div>
             <Link href="/account/rooms">
               <Button size="lg" variant="secondary">
-                Open Room Designer <ArrowRight className="h-4 w-4" />
+                Open saved rooms <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
