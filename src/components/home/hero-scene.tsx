@@ -14,8 +14,8 @@ interface HeroSceneProps {
 
 /**
  * Cinematic homepage hero. Renders the immersive 3D furniture scene behind the
- * wordmark with a smooth entrance transition. Falls back to the default sofa
- * scene when no configurable product is available.
+ * wordmark with a smooth entrance transition. Falls back to the default curved
+ * sofa scene when no configurable product is available.
  */
 export function HeroScene({ product }: HeroSceneProps) {
   const reduced = useReducedMotion();
@@ -25,7 +25,7 @@ export function HeroScene({ product }: HeroSceneProps) {
     if (raw && typeof raw === "object" && !Array.isArray(raw) && typeof (raw as { kind?: unknown }).kind === "string") {
       return raw as Record<string, unknown>;
     }
-    return { kind: "sofa" };
+    return { kind: "sofa-curved" };
   }, [product]);
 
   return (
