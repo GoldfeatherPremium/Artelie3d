@@ -7,6 +7,7 @@ import { SectionHeading } from "@/components/motion/section-heading";
 import { PaginationClient } from "@/components/shop/pagination-client";
 import { ShopToolbar } from "@/components/shop/shop-toolbar";
 import { listCategories, listBrands } from "@/lib/data/catalog";
+import { categoryBanner } from "@/lib/data/assets";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -42,12 +43,28 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     listBrands(),
   ]);
 
+  const banner = categoryBanner(category.slug) ?? category.image_url;
+
   return (
     <div className="bg-ivory">
-      <div className="container-site py-10 sm:py-14">
-        <SectionHeading overline="Category" title={category.name} description={category.description ?? undefined} />
+      {banner ? (
+        <div className="relative h-56 w-full overflow-hidden sm:h-72">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={banner} alt={category.name} className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 container-site pb-6">
+            <p className="text-caption font-medium uppercase tracking-[0.2em] text-ivory/80">Category</p>
+            <h1 className="mt-1 font-display text-display-lg text-paper">{category.name}</h1>
+          </div>
+        </div>
+      ) : (
+        <div className="container-site pt-10 sm:pt-14">
+          <SectionHeading overline="Category" title={category.name} description={category.description ?? undefined} />
+        </div>
+      )}
 
-        <div className="mt-6 border-t border-line pt-5">
+      <div className="container-site py-10 sm:py-14">
+        <div className="border-t border-line pt-5">
           <ShopToolbar categories={categories} brands={brands} current={{ category: category.slug, brand, sort: sort ?? null, page: String(page) }} total={result.total} />
         </div>
 
