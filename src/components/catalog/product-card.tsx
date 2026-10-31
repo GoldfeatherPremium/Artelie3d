@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Rating } from "@/components/ui/rating";
 import { WishlistButton } from "./wishlist-button";
 import type { CatalogProduct } from "@/lib/data/catalog";
+import { localHeroFor } from "@/lib/data/assets";
 
 export function ProductCard({ product, className }: { product: CatalogProduct; className?: string }) {
   const image = product.images[0];
+  const hero = localHeroFor(product.slug) ?? image?.url ?? null;
   const discount =
     product.sale_price_cents != null && product.sale_price_cents < product.base_price_cents
       ? Math.round((1 - product.sale_price_cents / product.base_price_cents) * 100)
@@ -16,11 +18,11 @@ export function ProductCard({ product, className }: { product: CatalogProduct; c
   return (
     <div className={cn("group relative flex flex-col", className)}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-stone/40">
-        {image ? (
+        {hero ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={image.url}
-            alt={image.alt_text ?? product.name}
+            src={hero}
+            alt={image?.alt_text ?? product.name}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           />
