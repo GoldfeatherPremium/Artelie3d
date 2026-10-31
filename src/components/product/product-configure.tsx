@@ -48,11 +48,6 @@ function defaultOptions(groups: CustomizationGroup[]): Record<string, string> {
   return out;
 }
 
-function optionPrice(priceAddCents: number): string {
-  if (priceAddCents === 0) return "Included";
-  return `${priceAddCents > 0 ? "+" : "−"}$${(Math.abs(priceAddCents) / 100).toFixed(2)}`;
-}
-
 export function ProductConfigure({ product }: ProductConfigureProps) {
   const toast = useToast();
   const groups = product.schema?.groups ?? [];
@@ -127,6 +122,29 @@ export function ProductConfigure({ product }: ProductConfigureProps) {
 
   return (
     <div>
+      {/* Live 3D preview */}
+      {product.modelConfig ? (
+        <div className="mb-8 overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-paper to-ivory">
+          <div className="h-80 w-full sm:h-96">
+            <Viewer modelConfig={product.modelConfig} materials={materials} />
+          </div>
+          <div className="flex items-center justify-between border-t border-line bg-paper px-4 py-2.5">
+            <span className="flex items-center gap-1.5 text-caption text-fog">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+              </span>
+              Live preview — changes update in real time
+            </span>
+            <span className="text-caption text-fog">Drag to orbit</span>
+          </div>
+        </div>
+      ) : (
+        <Badge variant="neutral" className="mb-6">
+          Standard configuration
+        </Badge>
+      )}
+
       {/* Option groups */}
       <div className="grid gap-6">
         {groups.map((group) => (
@@ -147,9 +165,7 @@ export function ProductConfigure({ product }: ProductConfigureProps) {
                     onClick={() => select(group.key, option.value)}
                     className={cn(
                       "flex items-center justify-between gap-2 rounded-xl border px-3.5 py-3 text-left transition-colors",
-                      selected
-                        ? "border-bronze bg-bronze/10"
-                        : "border-line bg-paper hover:border-bronze/50",
+                      selected ? "border-bronze bg-bronze/10" : "border-line bg-paper hover:border-bronze/50",
                     )}
                   >
                     <span className="flex items-center gap-2.5">
@@ -164,13 +180,11 @@ export function ProductConfigure({ product }: ProductConfigureProps) {
                       <span className="text-body-sm text-ink">{option.label}</span>
                     </span>
                     {option.material ? (
-                      <span
-                        className="h-4 w-4 shrink-0 rounded-full ring-1 ring-line"
-                        style={{ backgroundColor: option.material.color }}
-                        aria-hidden
-                      />
+                      <span className="h-4 w-4 shrink-0 rounded-full ring-1 ring-line" style={{ backgroundColor: option.material.color }} aria-hidden />
                     ) : (
-                      <span className="shrink-0 text-caption text-fog">{optionPrice(option.priceAddCents)}</span>
+                      <span className="shrink-0 text-caption text-fog">
+                        {option.priceAddCents === 0 ? "Included" : `${option.priceAddCents > 0 ? "+" : "−"}$${(Math.abs(option.priceAddCents) / 100).toFixed(2)}`}
+                      </span>
                     )}
                   </button>
                 );
@@ -230,7 +244,7 @@ export function ProductConfigure({ product }: ProductConfigureProps) {
         </div>
 
         <div className="mt-5 grid gap-3">
-          <AddToCartButton productId={product.id} quantity={quantity} configuration={options} label="Add to bag" size="lg" />
+          <AddToCartButton productId={product.id} quantity={quantity} configuration={options} label="Add configured piece to bag" size="lg" />
           <div className="grid grid-cols-2 gap-3">
             <Button type="button" variant="outline" onClick={() => setSaveOpen(true)}>
               <Save className="h-4 w-4" /> Save
@@ -267,5 +281,3 @@ export function ProductConfigure({ product }: ProductConfigureProps) {
     </div>
   );
 }
-
-export { optionPrice };
