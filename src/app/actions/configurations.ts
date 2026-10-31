@@ -137,7 +137,7 @@ export async function getPublicConfiguration(token: string): Promise<PublicConfi
 
   if (error || !data) return null;
 
-  const row = data as {
+  const row = data as unknown as {
     id: string;
     name: string;
     options: Record<string, string>;
